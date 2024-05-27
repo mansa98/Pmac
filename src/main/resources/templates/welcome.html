@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+	  xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="UTF-8">
+<title>Home</title>
+
+<!-- bootstrap -->
+<!-- <link rel="stylesheet" th:href="@{'/webjars/bootstrap/4.6.0/css/bootstrap.min.css'}"> -->
+</head>
+<body>
+	
+	<div sec:authorize="hasRole('ROLE_GUEST')">
+	  <b>- 권한(Role) :</b> [[${#authentication.principal.authorities[0]}]]
+	</div>
+	
+	<div sec:authorize="hasRole('ROLE_USER')">
+	  <b>- 권한(Role) :</b> ROLE_USER
+	</div>
+		
+	<hr>
+	
+	<!-- Pricipal -->
+	<div th:text="${#authentication}">
+	  The value of the "name" property of the authentication object should appear here.
+	</div>
+	
+	<hr>
+
+	<!-- Principal Name-->
+	<div th:utext="${'<b>아이디 : </b>' + #authentication.name}">
+	  The value of the "name" property of the authentication object should appear here.
+	</div>
+	
+	<hr>
+
+	<!-- <span th:utext="${'<b>' + #authentication.principal.attributes.nickname} + '</b> 님(별명) 로그인 하셨습니다.'"></span> -->
+		
+	<hr>
+	
+	<!-- 로그아웃 URL을 지정하지 않을 경우 묵시적으로 Spring Security는 /logout 주소를 기본 로그아웃 주소로 설정합니다. 
+	별도의 주소 설정시 설정 부분(SecurityConfig.java)에서 변경하면 됩니다. -->
+	<a th:href="@{'/logout'}" class="btn btn-info active" role="button">Logout</a>
+</body>
+</html>

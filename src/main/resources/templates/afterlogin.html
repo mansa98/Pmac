@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko-kr" 
+xmlns:th="http://www.thymeleaf.org"
+xmlns:sec="http://www.thymeleaf.org/extras/spring-security6">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+
+<!-- bootstrap webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap/5.3.1/css/bootstrap.min.css}" />
+<script th:src="@{/bootstrap/5.3.1/js/bootstrap.min.js}" charset="UTF-8"></script>
+
+<!-- bootstrap icons webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap-icons/1.11.1/font/bootstrap-icons.css}">
+
+<script th:src="@{/jquery/3.7.1/jquery.min.js}" charset="UTF-8"></script>
+
+<!-- axios  -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<style>
+
+/* 프리텐다드 폰트 */
+@font-face {
+    font-family: 'Pretendard-Regular';
+    src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
+* {
+	font-family: Pretendard-Regular;
+}
+
+.modal-title {
+	color: red;
+}
+
+.modal-body {
+	min-height: 300px;
+	background: pink;
+	width: inherit;
+	display: flex;
+	flex-direction: column;
+}
+
+.modal_body_upper {
+	width: 100%;
+	min-height: 100px;
+	background: silver;
+	font-size: 20px;
+	padding: 20px;
+}
+
+.modal_body_lower {
+	min-height: 200px;
+	width: 100%;
+	background: cyan;
+	padding: 20px;
+}
+
+.input_combined {
+	background: blue;
+	min-height: 150px;
+	width: 100%;
+}
+
+</style>
+
+<script>
+
+	$(window).on('load', function() {
+		
+		let someMessage = "";
+		
+		console.log("someMessage: " + someMessage);
+		
+		axios.post(`/hasNickname`, {
+			someMessage: "통신확인"
+		})
+				
+		/* axios 전송이 성공했을때 (HttpStatus.200) */
+		.then(function(response) {
+			
+			// console.log("서버 응답 : " + JSON.stringify(response));
+			
+			/* 컨트롤러로부터 돌려받은 response의 내용 */
+			alertMessage = response.data;
+			
+			console.log("response.data : " + alertMessage);
+
+			// alert(alertMessage);
+			
+			if (alertMessage == "우리 사이트 고유 닉네임이 없는 유저") {
+			
+				$("#staticBackdrop").modal("show");
+			}
+			
+			
+		 })
+		 
+		 /* axios 전송이 실패했을때 (HttpStatus.200 외) */
+		 .catch(function(err) {
+			 
+			console.error("서버 에러가 발견되었습니다." + err);
+			
+		 });// axios
+		
+		
+	    // $('#staticBackdrop').modal('show');
+	    
+	    let staticBackdrop = document.getElementById("staticBackdrop");
+	    
+	    let testBtn = document.getElementById("test_btn");
+	    
+	    let clickCnt = 0;
+	    
+	    // 닉네임 전송용 폼 획득
+	    let nicknameForm = document.getElementById("nickname_form");
+	    
+	    console.log("폼을 얻었나? " + nicknameForm);
+	    
+	    let submitNickname = document.getElementById("submit_nickname")
+	    
+	    console.log("버튼을 얻었나? " + submitNickname);
+	    
+	    
+	    let closeBtn = document.getElementById("close_btn");
+	    
+	    // 모달 쉬운 탈출 방지
+	    closeBtn.onclick = function(e) {
+	    	
+	    	alert("이봐 친구, 들어올땐 마음대로였지만 나갈땐 아니라구?");
+	    	
+	    }// onclick
+	    
+	    
+	    // 유저가 input에 입력한 nickname을 form으로 RestController에 넘겨서 처리(update?)
+	    submitNickname.onclick = function(e) {
+	    	
+	    	// RestController로 전송할 폼 데이터
+		    let nicknameFD = new FormData(nicknameForm);
+	    	
+	    	axios.post(`/addNickname`, nicknameFD)
+	    	.then(function(response){
+	    		
+	    		alertMessage = response.data;
+				
+				console.log("response.data : " + alertMessage);
+				
+				console.log(alertMessage + "아쎄이 완전한 우리가 된걸 환영한다!");
+				
+				alert(alertMessage + "아쎄이 완전한 우리가 된걸 환영한다!");
+				
+	    		location.href="[[@{/afternealo}]]";
+	    	})
+	    	.catch(function(err){
+	    		
+	    		console.error("서버 에러가 발견되었습니다." + err);
+	    		
+	    	});// axios
+	    			
+	    	
+	    	
+	    	
+	    }// onclick
+	    
+	    
+	    
+	});// onload
+	
+	
+	
+	
+	
+	
+	
+	
+	// 페이지 로드시 모달 팝업
+	/* $(document).ready(function(){
+		
+		let test = "[[${test}]]";
+		
+		let modalBody = document.querySelector(".modal_body");
+		
+		$( modalBody ).html(test);
+		
+		$("#staticBackdrop").modal("show");
+		
+		
+		
+	}); */
+	
+	
+		
+		
+	
+
+
+</script>
+</head>
+<body>
+
+	
+	<div>			<!-- null일때 오류 방지를 위해 반드시 필요 -->
+		너는 <strong th:if="${session.user != null}" style="color:red; font-size:30px;">[[${session.user.provider}]]</strong>를 이용하는 프렌드구나 
+		<span th:if="${user} != null">[[${user}]]</span>
+	</div>
+	
+	<div th:text="${provider}"></div>
+	
+	<div th:utext="${'<b>OAuth 정보 : </b>' + #authentication}"></div>
+	
+	<a th:href="@{'/logout'}" 
+			class="btn active m-2" id="logout_btn" role="button" style="background-image:url('/images/btnG_완성형.png'); background-size:100% 100%; width:150px; height:100px;">로그아웃</a>
+	<!-- <a class="btn active m-2" id="test_btn" role="button" style="background-image:url('/images/btnG_완성형.png'); background-size:100% 100%; width:150px; height:100px;">테스트</a> -->
+	
+	<div style="font-size: 50px; color: red;" sec:authorize="hasRole('ROLE_USER')" th:text="${user.nickname} + '환영한다 너는 이제 완전한 우리가 되었다.'"></div>			
+	<!-- Button trigger modal -->
+	<!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+	  Launch static backdrop modal
+	</button>	 -->	
+		
+	<!-- Modal -->
+	<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	    	<form id="nickname_form" method="post" th:action="@{/addNickname.do}">
+		      <div class="modal-header">
+		        <h1 class="modal-title fs-5" id="staticBackdropLabel">캠핑가자에 온 걸 진심으로 환영한다 아쎄이</h1>
+		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		      </div>
+		      <div class="modal-body">
+		      	<div sec:authorize="hasRole('ROLE_USER')" class="modal_body_upper">
+		        	내 보아하니 너는 [[${session.user.provider}]]를 이용하는 친구지만 우리 사이트의 닉네임이 없는 프렌드구나!
+		        </div>
+		        <div class="modal_body_lower">
+		        	<div class="input-group input_combined mb-3">
+					  <span class="input-group-text" id="basic-addon1">닉네임 입력</span>
+					  <input type="text" id="nickname" name="nickname" class="form-control nickname" placeholder="여기에 원하시는 닉네임을 입력하세요" aria-label="Username" aria-describedby="basic-addon1" maxlength="49">
+					</div>
+		        </div>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" id="close_btn" class="btn btn-secondary">Close</button>
+		        <button type="submit" id="submit_nickname" class="btn btn-primary">닉네임 결정하기</button>
+		      </div>
+	      </form>
+	    </div>
+	  </div>
+	</div>
+
+</body>
+</html>

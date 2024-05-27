@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko-kr" 
+xmlns:th="http://www.thymeleaf.org"
+xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="UTF-8">
+<title>header</title>
+
+</head>
+<body>
+
+	<div th:fragment="header">
+		
+		<!-- Navigation-->
+        <nav class="navbar row navbar-expand-lg navbar-light fixed-top py-0" id="mainNav">
+            <div class="container row" id="header_container">
+            	<a class="navbar-brand col-1 ps-5" id="website_logo" th:href="@{'/'}"><img height=50px width=50px th:src="@{/images/assets/img/캠핑가자로고.png}"></a>
+                <a class="navbar-brand col-1" href="#page-top">캠핑가자</a>
+                <!-- <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button> -->
+                <div class="collapse navbar-collapse col-10" id="navbarResponsive">
+                    <ul class="navbar-nav my-2 my-lg-0" id="header_menu_section">
+                        <li class="nav-item"><a class="nav-link" href="#services">인기 캠핑장</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#camping_recomm">캠핑장 추천받기</a></li>
+                        <li sec:authorize="isAnonymous()" class="nav-item"><a class="nav-link" th:href="@{/signin}">로그인</a></li>
+                        
+                        <li sec:authorize="isAuthenticated()" th:unless="${#authentication.principal == 'anonymousUser'}" class="nav-item"><a class="nav-link" sec:authorize="isAuthenticated()" id="greeting_message" th:utext="|<span id='print_header_nickname'>${#strings.abbreviate(session.user.nickname,15) + '</span> &nbsp;회원님'}|"></a></li>
+                        <!-- 0525 재욱 -->
+                        <!-- <li sec:authorize="isAuthenticated()" class="nav-item"><a class="nav-link" sec:authorize="isAuthenticated()" id="greeting_message" th:utext="|${#strings.abbreviate(session.user.nickname,10) + '&nbsp;회원님'}|"></a><li> -->
+                        <li sec:authorize="hasRole('ROLE_USER')" class="nav-item"><a class="nav-link" th:href="@{/logout}">로그아웃</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+	</div>
+
+</body>
+</html>

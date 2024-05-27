@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html 
+lang="en"
+xmlns:th="http://www.thymeleaf.org"
+xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+layout:decorate="~{layout}"
+xmlns:sec="http://www.thymeleaf.org/extras/spring-security6"
+>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+<meta name="description" content="" />
+<meta name="author" content="" />
+<title>캠핑가자</title>
+<!-- Favicon-->
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+<!-- Bootstrap Icons-->
+<!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" /> -->
+<!-- Google fonts-->
+<link href="https://fonts.googleapis.com/css?family=Merriweather+Sans:400,700" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css?family=Merriweather:400,300,300italic,400italic,700,700italic" rel="stylesheet" type="text/css" />
+<!-- SimpleLightbox plugin CSS-->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/SimpleLightbox/2.1.0/simpleLightbox.min.css" rel="stylesheet" />
+<!-- Core theme CSS (includes Bootstrap)-->
+<link href="css/styles.css" rel="stylesheet" />
+
+<script th:src="@{/jquery/3.7.1/jquery.min.js}" charset="UTF-8"></script>
+
+<!-- axios  -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+
+	$(window).on('load', function() {
+		
+		let auth = "[[${#authentication.principal}]]";
+	
+		console.log("auth: " + auth);
+		
+		let someMessage = "";
+		
+		console.log("someMessage: " + someMessage);
+		
+		if (auth != "anonymousUser") {
+		
+			axios.post(`/hasNickname`, {
+				someMessage: "통신확인"
+			})
+					
+			/* axios 전송이 성공했을때 (HttpStatus.200) */
+			.then(function(response) {
+				
+				// console.log("서버 응답 : " + JSON.stringify(response));
+				
+				/* 컨트롤러로부터 돌려받은 response의 내용 */
+				alertMessage = response.data;
+				
+				console.log("response.data : " + alertMessage);
+	
+				// alert(alertMessage);
+				
+				if ((alertMessage == "우리 사이트 고유 닉네임이 없는 유저") && (auth != "anonymousUser")) {
+				
+					$("#staticBackdrop").modal("show");
+				}
+				
+				
+			 })
+			 
+			 /* axios 전송이 실패했을때 (HttpStatus.200 외) */
+			 .catch(function(err) {
+				 
+				console.error("서버 에러가 발견되었습니다." + err);
+				
+			 });// axios
+		}// if
+		
+		
+	    // $('#staticBackdrop').modal('show');
+	    
+	    let staticBackdrop = document.getElementById("staticBackdrop");
+	    
+	    let testBtn = document.getElementById("test_btn");
+	    
+	    let clickCnt = 0;
+	    
+	    // 닉네임 전송용 폼 획득
+	    let nicknameForm = document.getElementById("nickname_form");
+	    
+	    console.log("폼을 얻었나? " + nicknameForm);
+	    
+	    let submitNickname = document.getElementById("submit_nickname")
+	    
+	    console.log("버튼을 얻었나? " + submitNickname);
+	    
+	    
+	    let closeBtn = document.getElementById("close_btn");
+	    
+	    // 모달 쉬운 탈출 방지
+	    closeBtn.onclick = function(e) {
+	    	
+	    	alert("이봐 친구, 들어올땐 마음대로였지만 나갈땐 아니라구?");
+	    	
+	    }// onclick
+	    
+	    
+	    // 유저가 input에 입력한 nickname을 form으로 RestController에 넘겨서 처리(update?)
+	    submitNickname.onclick = function(e) {
+	    	
+	    	// RestController로 전송할 폼 데이터
+		    let nicknameFD = new FormData(nicknameForm);
+	    	
+	    	axios.post(`/addNickname`, nicknameFD)
+	    	.then(function(response){
+	    		
+	    		alertMessage = response.data;
+				
+				console.log("response.data : " + alertMessage);
+				
+				console.log(alertMessage + "아쎄이 완전한 우리가 된걸 환영한다!");
+				
+				alert(alertMessage + "아쎄이 완전한 우리가 된걸 환영한다!");
+				
+	    		location.href="[[@{/afternealo}]]";
+	    	})
+	    	.catch(function(err){
+	    		
+	    		console.error("서버 에러가 발견되었습니다." + err);
+	    		
+	    	});// axios
+	    			
+	    	
+	    	
+	    	
+	    }// onclick
+	    
+	    
+	    
+	});// onload
+	
+	
+    document.addEventListener("DOMContentLoaded", function() {
+        // 폼 요소 선택
+        var form = document.querySelector('form');
+
+        // 폼 제출 이벤트에 대한 이벤트 리스너 추가
+        form.addEventListener('submit', function(event) {
+            // 라디오 버튼 선택
+            var radioButtons = document.querySelectorAll('input[type=radio][name="themeSearch"]');
+            var isChecked = false;
+
+            // 라디오 버튼 중 하나가 선택되었는지 확인
+            radioButtons.forEach(function(radioButton) {
+                if (radioButton.checked) {
+                    isChecked = true;
+                }
+            });
+
+            // 라디오 버튼 중 하나도 선택되지 않았으면 폼 제출을 막고 알림을 표시
+            if (!isChecked) {
+                event.preventDefault(); // 폼 제출 막기
+                alert("강 또는 산 중 하나를 선택하세요."); // 알림 표시
+            }
+        });
+    });
+	
+	
+	
+	
+	// 페이지 로드시 모달 팝업
+	/* $(document).ready(function(){
+		
+		let test = "[[${test}]]";
+		
+		let modalBody = document.querySelector(".modal_body");
+		
+		$( modalBody ).html(test);
+		
+		$("#staticBackdrop").modal("show");
+		
+		
+		
+	}); */
+	
+	
+		
+		
+	
+
+
+</script>
+
+
+</head>
+<body id="page-top">
+	<!-- layout:content -->
+	<div layout:fragment="content">
+    
+	     <!-- Masthead-->
+	     <header class="masthead">
+	     	<!-- container -->
+	         <div class="container px-4 px-lg-5 h-100">
+	             <!-- row -->
+	             <div class="row gx-4 gx-lg-5 h-100 align-items-center justify-content-center text-center">
+	                 <div class="col-lg-8 align-self-end">
+	                     <h1 class="text-white font-weight-bold" style="word-spacing: 10px; margin-bottom: 50px;">강,산으로 캠핑가자</h1>                    
+	                     <!-- <hr class="divider" /> -->
+	                 </div>
+	                 <!-- 검색 박스 -->
+	                 
+                    <div class="col-lg-8 align-self-baseline" id="searchBox">
+                    <form th:action="@{/camp/searchList.do}" method="get">
+                        <p class="text-white mb-4"> </p>
+                        <div style="margin-right: 680px;">
+                            <p class="text-black" style="width: 150px;">테마를 골라주세요!</p>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" id="themeSearch" name="themeSearch" value="강">
+                                <label class="form-check-label" for="themeSearch" style="color:#6C757D">강</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" id="themeSearch" name="themeSearch" value="산">
+                                <label class="form-check-label" for="themeSearch" style="color:#6C757D">산</label>
+                            </div>
+                        </div>
+                        <p class="text-white mb-3"></p>
+                        <!-- d-flex -->
+                        <div class="d-flex">
+                        	<!-- select_box_wrapper -->
+                            <div class="select_box_wrapper me-2">
+                                <select name="addressSearch" id="addressSearch" style="color: #6C757D; height: 50px; border-radius: 6px;">
+                                    <option value="전체">전체/도</option>
+                                    <option value="서울시">서울시</option>
+                                    <option value="부산시">부산시</option>
+                                    <option value="대구광역시">대구시</option>
+                                    <option value="인천광역시">인천시</option>
+                                    <option value="광주광역시">광주시</option>
+                                    <option value="대전광역시">대전시</option>
+                                    <option value="울산광역시">울산시</option>
+                                    <option value="세종특별자치시">세종시</option>
+                                    <option value="경기도">경기도</option>
+                                    <option value="강원도">강원도</option>
+                                    <option value="충청북도">충청북도</option>
+                                    <option value="충청남도">충청남도</option>
+                                    <option value="전라북도">전라북도</option>
+                                    <option value="전라남도">전라남도</option>
+                                    <option value="경상북도">경상북도</option>
+                                    <option value="경상남도">경상남도</option>
+                                    <option value="제주특별자치도">제주도</option>
+                                </select>
+                            </div><!-- //select_box_wrapper -->
+                            <div class="searchButton">
+                                    <div style="width:610px"><input class="form-control mr-sm-2" style="height:50px"type="search" id="searchWord" name="searchWord" placeholder="캠핑장 이름을 검색하세요" aria-label="Search"></div>
+                                    <div style="width:120px"><button style="background-color: #12B7E2; height:50px; border-radius: 5px; color: white" type="submit">캠핑장 검색</button></div>
+                            </div>
+                        </div><!--//d-flex-->
+                        </form>
+	                 </div><!-- //col-8 -->
+	             </div><!-- //row -->
+	         </div><!-- //container -->
+	         
+	     </header><!-- //masthead -->
+	     
+	     <!-- About-->
+	     <!-- <section class="page-section bg-primary" id="about">
+	         <div class="container px-4 px-lg-5">
+	             <div class="row gx-4 gx-lg-5 justify-content-center">
+	                 <div class="col-lg-8 text-center">
+	                     <h2 class="text-white mt-0">We've got what you need!</h2>
+	                     <hr class="divider divider-light" />
+	                     <p class="text-white-75 mb-4">Start Bootstrap has everything you need to get your new website up and running in no time! Choose one of our open source, free to download, and easy to use themes! No strings attached!</p>
+	                     <a class="btn btn-light btn-xl" href="#services">Get Started!</a>
+	                 </div>
+	             </div>
+	         </div>
+	     </section> -->
+	     <!-- Services-->
+	     <!-- welcome_lower -->
+	     <section class="page-section" id="services">
+	         <div class="container px-4 px-lg-5">
+	             <h2 class="text-center mt-0">인기 캠핑장</h2>
+	             <hr class="divider" />
+	             <div class="row gx-4 gx-lg-5 best_camp_wrapper">
+	                 <div class="col-lg-3 col-md-6 text-center best_camp_1">
+	                     <div class="mt-5">
+	                         <div class="mb-2"><i class="bi-gem fs-1 text-primary"></i></div>
+	                         <h3 class="h4 mb-2">Camp Name 1</h3>
+	                         <p class="text-muted mb-0">Our themes are updated regularly to keep them bug free!</p>
+	                     </div>
+	                 </div>
+	                 <div class="col-lg-3 col-md-6 text-center best_camp_2">
+	                     <div class="mt-5">
+	                         <div class="mb-2"><i class="bi-laptop fs-1 text-primary"></i></div>
+	                         <h3 class="h4 mb-2">Camp Name 2</h3>
+	                         <p class="text-muted mb-0">All dependencies are kept current to keep things fresh.</p>
+	                     </div>
+	                 </div>
+	                 <div class="col-lg-3 col-md-6 text-center best_camp_3">
+	                     <div class="mt-5">
+	                         <div class="mb-2"><i class="bi-globe fs-1 text-primary"></i></div>
+	                         <h3 class="h4 mb-2">Camp Name 3</h3>
+	                         <p class="text-muted mb-0">You can use this design as is, or you can make changes!</p>
+	                     </div>
+	                 </div>
+	                 <div class="col-lg-3 col-md-6 text-center best_camp_4">
+	                     <div class="mt-5">
+	                         <div class="mb-2"><i class="bi-heart fs-1 text-primary"></i></div>
+	                         <h3 class="h4 mb-2">Camp Name 4</h3>
+	                         <p class="text-muted mb-0">Is it really open source if it's not made with love?</p>
+	                     </div>
+	                 </div>
+	             </div>
+	         </div>
+	         <div class="camping_recomm" id="camping_recomm">
+	         	<div class="camping_recomm_image">
+	         		캠핑장 추천받기
+	         	</div>
+	         </div>
+	     </section><!-- //welcome_lower -->
+	     
+     	<!-- Modal -->
+		<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		    	<form id="nickname_form" method="post" th:action="@{/addNickname.do}">
+			      <div class="modal-header">
+			        <h1 class="modal-title fs-5" id="staticBackdropLabel">캠핑가자에 온 걸 진심으로 환영한다 아쎄이</h1>
+			        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			      </div>
+			      <div class="modal-body">
+			      	<div sec:authorize="hasRole('ROLE_USER')" class="modal_body_upper">
+			        	내 보아하니 너는 [[${session.user.provider}]]를 이용하는 친구지만 우리 사이트의 닉네임이 없는 프렌드구나!
+			        </div>
+			        <div class="modal_body_lower">
+			        	<div class="input-group input_combined mb-3">
+						  <span class="input-group-text" id="basic-addon1">닉네임 입력</span>
+						  <input type="text" id="nickname" name="nickname" class="form-control nickname" placeholder="여기에 원하시는 닉네임을 입력하세요" aria-label="Username" aria-describedby="basic-addon1" maxlength="49">
+						</div>
+			        </div>
+			      </div>
+			      <div class="modal-footer">
+			        <button type="button" id="close_btn" class="btn btn-secondary">Close</button>
+			        <button type="submit" id="submit_nickname" class="btn btn-primary">닉네임 결정하기</button>
+			      </div>
+		      </form>
+		    </div>
+		  </div>
+		</div>
+	     
+	     
+	     <!-- Portfolio-->
+	     <!-- <div id="portfolio">
+	         <div class="container-fluid p-0">
+	             <div class="row g-0">
+	                 <div class="col-lg-4 col-sm-6">
+	                     <a class="portfolio-box" href="assets/img/portfolio/fullsize/1.jpg" title="Project Name">
+	                         <img class="img-fluid" src="assets/img/portfolio/thumbnails/1.jpg" alt="..." />
+	                         <div class="portfolio-box-caption">
+	                             <div class="project-category text-white-50">Category</div>
+	                             <div class="project-name">Project Name</div>
+	                         </div>
+	                     </a>
+	                 </div>
+	                 <div class="col-lg-4 col-sm-6">
+	                     <a class="portfolio-box" href="assets/img/portfolio/fullsize/2.jpg" title="Project Name">
+	                         <img class="img-fluid" src="assets/img/portfolio/thumbnails/2.jpg" alt="..." />
+	                         <div class="portfolio-box-caption">
+	                             <div class="project-category text-white-50">Category</div>
+	                             <div class="project-name">Project Name</div>
+	                         </div>
+	                     </a>
+	                 </div>
+	                 <div class="col-lg-4 col-sm-6">
+	                     <a class="portfolio-box" href="assets/img/portfolio/fullsize/3.jpg" title="Project Name">
+	                         <img class="img-fluid" src="assets/img/portfolio/thumbnails/3.jpg" alt="..." />
+	                         <div class="portfolio-box-caption">
+	                             <div class="project-category text-white-50">Category</div>
+	                             <div class="project-name">Project Name</div>
+	                         </div>
+	                     </a>
+	                 </div>
+	                 <div class="col-lg-4 col-sm-6">
+	                     <a class="portfolio-box" href="assets/img/portfolio/fullsize/4.jpg" title="Project Name">
+	                         <img class="img-fluid" src="assets/img/portfolio/thumbnails/4.jpg" alt="..." />
+	                         <div class="portfolio-box-caption">
+	                             <div class="project-category text-white-50">Category</div>
+	                             <div class="project-name">Project Name</div>
+	                         </div>
+	                     </a>
+	                 </div>
+	                 <div class="col-lg-4 col-sm-6">
+	                     <a class="portfolio-box" href="assets/img/portfolio/fullsize/5.jpg" title="Project Name">
+	                         <img class="img-fluid" src="assets/img/portfolio/thumbnails/5.jpg" alt="..." />
+	                         <div class="portfolio-box-caption">
+	                             <div class="project-category text-white-50">Category</div>
+	                             <div class="project-name">Project Name</div>
+	                         </div>
+	                     </a>
+	                 </div>
+	                 <div class="col-lg-4 col-sm-6">
+	                     <a class="portfolio-box" href="assets/img/portfolio/fullsize/6.jpg" title="Project Name">
+	                         <img class="img-fluid" src="assets/img/portfolio/thumbnails/6.jpg" alt="..." />
+	                         <div class="portfolio-box-caption p-3">
+	                             <div class="project-category text-white-50">Category</div>
+	                             <div class="project-name">Project Name</div>
+	                         </div>
+	                     </a>
+	                 </div>
+	             </div>
+	         </div>
+	     </div> -->
+    
+    </div><!-- //layout:content -->
+  
+    
+    <!-- Bootstrap core JS-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SimpleLightbox plugin JS-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/SimpleLightbox/2.1.0/simpleLightbox.min.js"></script>
+    <!-- Core theme JS-->
+    <script src="js/scripts.js"></script>
+    <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
+    <!-- * *                               SB Forms JS                               * *-->
+    <!-- * * Activate your form at https://startbootstrap.com/solution/contact-forms * *-->
+    <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
+    <script src="https://cdn.startbootstrap.com/sb-forms-latest.js"></script>
+</body>
+</html>

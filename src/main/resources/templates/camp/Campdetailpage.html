@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="ko-kr" 
+xmlns:th="http://www.thymeleaf.org"
+xmlns:layout="www.ultraq.net.nz/thymeleaf/layout"
+layout:decorate="~{layout}"
+xmlns:sec="http://www.thymeleaf.org/extras/spring-security6">
+<head>
+<meta charset="UTF-8">
+<title>캠핑장 상세 페이지</title>
+
+<!-- bootstrap webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap/5.3.1/css/bootstrap.min.css}" />
+
+<!-- bootstrap icons webjars -->
+<link rel="stylesheet" th:href="@{/bootstrap-icons/1.11.1/font/bootstrap-icons.css}">
+
+<!-- axios  -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script src="/js/memberReview.js"></script>
+
+<script>
+	window.onload=function() {
+		
+		// 교정한 자리 05-25 4시 : nickname -> session.user.nickname
+		let nickname = "[[${session.user != null && session.user.nickname != null ? session.user.nickname : 'User'}]]";
+		
+		console.log("현재 로그인한 회원 : " + nickname);
+		
+		let campId = "[[${CampFilteredVO.id}]]";
+		
+		let memberReviewNumString = "memberReviewNum";
+		
+		
+		getAllReplies(campId, nickname);
+		
+		writeReply(campId, nickname);
+		
+		updateReply(campId, nickname);
+		
+		deleteReply(campId, nickname);
+		
+	}
+</script>
+
+<style>
+
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+.tab {
+  display: flex;
+  align-items: center;
+  padding-right : 75rem;
+}
+#tab3 {
+  left: 500px;
+/*   background-color: orange; */
+}
+
+.tab__item {
+  padding: 0.6rem 1.3rem;
+  margin-right: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+.tab__item.active {
+  visibility: visible;
+  color: #fff;
+  background-color: #FF923E;
+}
+.tab__content-wrapper {
+  /* background-color: yellow; */
+  padding: 1.5rem;
+  width: 100%;
+/*   margin-right: 500px; */
+  margin-bottom: 750px;
+}
+.tab__content {
+  visibility: hidden;
+}
+.tab__content.active {
+  visibility: visible;
+}
+.content_section_detail {
+	/* background-color: gray; */
+	width: 100%;
+	min-height: inherit;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.detail_page_name {
+	width: 100%;
+	height: 200px;
+	font-size: 2.5em;
+	font-family: Pretendard-Regular;
+	padding: 50px 0 0 200px;
+	/* background: orange; */
+	
+}
+
+/* 서브 이미지 추가된 것들 */
+.image_intro {
+	padding: 50px;
+	
+}
+
+.image_intro img {
+	width: 384px;
+	height: 216px;
+}
+
+.detail_page_container_sub{
+	display: flex;
+	flex-direction: row;
+}
+/* ================= */
+
+/* 지도 추가된 것들 */
+.detail_page_container_map {
+	padding: 30px;
+}
+
+/* .detail_page_back_box {
+	display: flex;
+	align-items: center;
+	padding-right : 82rem;
+}
+.detail_page_back {
+	background-color: skyblue;
+	padding: 0.6rem 1.3rem;
+	margin-right: 1rem;
+	border: 1px solid #ddd;
+	border-radius: 5px;
+}
+ */
+.content_section_detail div[class="detail_page_container"] {
+	/* background-color: #f5f5f5; */
+	width: calc(100% - 400px);
+	/* min-height: 600px; */
+	height: fit-content;
+	display: flex;
+	/* flex-direction: column; */
+	justify-content: center;
+	align-items: center;
+}
+
+#page_info_section {
+	width: 100%;
+	text-align: right;
+	/* background: cyan; */
+	color: gray;
+	padding-right: 50px;
+	
+}
+
+.content_section_detail div[class="detail_page_container"]:nth-child(2) {
+	/* background: pink; */
+
+}
+
+.content_section_detail div[class="detail_page_container"]:nth-child(3) {
+	/* background: skyblue; */
+	min-height: 300px;
+	position: relative;
+
+}
+
+.content_section_detail div[class="detail_page_container"]:nth-child(4) {
+	/* background: yellowgreen; */
+	min-height: 400px;
+	position: relative;
+
+}
+
+.camp_detail_image img {
+	object-fit: cover;
+	border-radius: 2%;
+	padding:20px;
+}
+
+.camp_detail_title {
+	margin-top: 100px;
+	width: 100%;
+	font-family: Pretendard-Regular;
+	font-size: 2em;
+	text-align: right;
+	padding-right: 50px;
+}
+
+.camp_detail_title_content{
+	margin-top: 100px;
+	width: 100%;
+	font-family: Pretendard-Regular;
+	font-size: 1em;
+	text-align: left;
+	padding: 20px;
+}
+
+.camp_detail_title_content_frame {
+	/* background-color: silver; */
+	width: calc(100% - 400px);
+	height: 600px;
+	margin-bottom: 30px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.camp_detail_og_writer {
+	width: 100%;
+	font-size: 1.5em;
+	text-align: right;
+	padding-right: 50px;
+}
+
+.camp_detail_og_writer span {
+	color: silver;
+}
+
+.camp_detail_menu_title {
+	position: absolute;
+	top: 50px;
+	left: 50px;
+	/* background: coral; */
+	width: 95%;
+	font-family: Pretendard-Regular;
+	
+}
+
+.camp_detail_menu_title a {
+	font-size: 1.5em;
+}
+
+.camp_detail_menu_title hr {
+	border: 1px solid black;
+}
+
+.camp_detail_menu {
+	width: 90%;
+	/* background: blue; */
+	margin-top: 160px;
+	margin-bottom: 70px;
+	
+}
+
+div[class^="camp_detail_menu_"] {
+	font-size: 1.1em;
+	margin-top: 30px;
+	font-family: Pretendard;
+	letter-spacing: 1.5px;
+}
+
+.camp_detail_elem_title {
+	position: absolute;
+	top: 50px;
+	left: 50px;
+	/* background: coral; */
+	width: 95%;
+	font-family: Pretendard;
+	
+}
+
+.camp_detail_elem_title span {
+	font-size: 2em;
+}
+
+.camp_detail_elem_title hr {
+	border: 1px solid black;
+}
+
+.camp_detail_elem {
+	/* background: pink; */
+	width: 80%;
+}
+
+.camp_detail_elem .camp_elem {
+	margin-top: 200px;
+	/* background: blue; */
+	display: flex;
+	flex-direction: column;
+	align-items: left;
+}
+
+.camp_elem_step:nth-child(n) {
+	/* background: #C0C0C0; */
+	margin: 0 0 30px 0;
+	height: 300px;
+	font-size: 22px;
+	letter-spacing: 2px;
+	/* margin: 0 0 50px 0; */
+}
+
+.camp_elem_step:nth-child(2n+1) {
+	/* background: #00C1DD; */
+	color: black;
+	font-family: Pretendard-Regular;
+	/* margin: 0 0 50px 0; */
+}
+
+.camp_elem_step:nth-child(2n) {
+	/* background: #C0C0C0; */
+	background: #FFFFFF;
+	/* color: black; */
+	font-family: Pretendard-Regular;
+	/* margin: 0 0 50px 0; */
+}
+
+.camp_detail_elem .camp_elem_images {
+	margin-top: 200px;
+	/* background: #643; */
+	display: flex;
+	align-items: flex-end;
+}
+
+.camp_elem_image {
+	height: 300px;
+	width: 300px;
+	margin-bottom: 30px;
+}
+
+.camp_elem_image img{
+	width: inherit;
+	height: inherit;
+	border-radius: 5%;
+	object-fit: cover;
+}
+
+.thumbsup_section {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	padding: 30px;
+}
+
+#thumbsup_btn_wrapper {
+	margin-right: 10px;
+}
+
+#favorite_btn_wrapper {
+	margin-left: 10px;
+}
+
+#header_container {
+	width: 100%;
+	padding: 0;
+	padding-bottom:10px;
+	padding-top:10px;
+	background-color: #dee2e6;
+}
+
+/* 웹사이트 로고 */
+#website_logo {
+	margin-left: 50px;
+	margin-right: 0;
+}
+
+/* 헤더 중 메인메뉴들 */
+#header_menu_section {
+	width: 100%;
+	margin-left: 0;
+	margin-right: 0;
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+	padding-right: 60px;
+	align-items: center;
+}
+
+
+
+/* 헤더 메인메뉴 메뉴 각각 */
+#header_menu_section li{
+	margin-left: 30px;
+	margin-right: 30px;
+}
+
+/* 어쩌구저쩌구..유저님 안녕하세요 부분 */
+#header_menu_section li:nth-child(3){
+	margin-left: 70px;
+	display: flex;
+	flex-direction: row;
+	width: 270px;	
+}
+/* 상세페이지 아이콘 추가 */
+
+ul{
+   list-style-type: none;
+}
+
+.icon {
+   padding:0px;
+}
+#iconSet {
+   padding:0px;
+}
+
+#iconSet li{
+   display: flex;
+   flex-direction: column;
+   padding-right: 50px;
+}
+
+#iconSet li img{
+   width:30px;
+   height:30px;
+   margin: auto;
+}
+
+
+
+</style>
+</head>
+<body>
+	<div layout:fragment="content" class="content_section" th:object="${CampFilteredVO}">
+		<div class="content_section_detail" >
+			<!-- 페이지 이름(상세 페이지) -->
+			<div class="detail_page_name">
+			</div>
+			<!-- //페이지 이름 -->
+			<!-- <div class="detail_page_back_box">
+			<div class="detail_page_back">◀ 뒤로가기</div>
+			</div> -->
+			<!-- 캠핑장 사진, 제목, 소개글-->
+			<div class="detail_page_container">
+				<div class="camp_detail_image">
+					<img th:if="${CampImageVO != null}" th:src="${CampImageVO.campImageMain}" width=900px height=600px>
+				</div>
+				<div class="camp_detail_title_content_frame">
+					<div class="camp_detail_title">
+						<span th:text="${CampFilteredVO.campName}"></span>
+					</div>
+					<!-- 소개글 -->
+					<div class="camp_detail_title_content">
+						<span th:if="${CampFilteredVO.facilDetail == '알수없음'}"><a th:text="'준비중입니다.'"></a></span>
+						<span th:if="${CampFilteredVO.facilDetail != '알수없음'}"><span th:text="${CampFilteredVO.facilDetail}"></span></span>
+					</div>
+					<!-- //소개글 -->
+				</div>
+			</div>
+			<!-- //캠핑장 사진, 제목 -->
+				<ul class="tab" style="list-style:none;">
+						<li class="tab__item active"><a href="#tab1">상세정보</a></li>
+						<li id="tab_map" class="tab__item"><a  href="#tab2">지도</a></li>
+						<li class="tab__item"><a href="#tab3">리뷰</a></li>
+				</ul>
+			<!--  캠핑장 상세정보 -->
+			<div class="detail_page_container">
+				<!-- <div class="camp_detail_menu_title">
+					<ul class="tab">
+						<li class="tab__item active"><a href="#tab1">상세정보</a></li>
+						<li class="tab__item"><a href="#tab2">지도</a></li>
+						<li class="tab__item"><a href="#tab3">리뷰</a></li>
+					</ul>
+				</div> -->
+				<div class="tab__content-wrapper">
+				<div id="tab1" class="tab__content active" style="position:absolute;">
+					<div class="camp_detail_menu_main col-12" >
+						<span style="font-weight: bold;">주소 |</span>
+						<span th:text="${CampFilteredVO.jibunAddress}"></span>
+					</div>
+					<div class="camp_detail_menu_main col-12" >
+						<span style="font-weight: bold;">캠핑장 환경 |</span>
+						<span th:text="${CampFilteredVO.theme}"></span>
+					</div>
+					<div class="camp_detail_menu_main col-12" >
+						<span style="font-weight: bold;">캠핑장 특징 |</span>
+						<span th:text="${CampFilteredVO.cate3}"></span>
+					</div>
+					<div class="camp_detail_menu_main col-12" >
+						<span style="font-weight: bold;">운영기간 |</span>
+						<span th:text="${CampFilteredVO.weekdayOpStatus} + ' /'"></span>
+						<span th:text="${CampFilteredVO.weekendOpStatus} + ' /'"></span>
+						<span th:text="${CampFilteredVO.springOpStatus} + ' /'"></span>
+						<span th:text="${CampFilteredVO.summerOpStatus} + ' /'"></span>
+						<span th:text="${CampFilteredVO.fallOpStatus} + ' /'"></span>
+						<span th:text="${CampFilteredVO.winterOpStatus}"></span>
+					</div>
+					<div class="camp_detail_menu_main col-12" >
+						<span style="font-weight: bold;">전화번호 |</span>
+						<span th:text="${CampFilteredVO.Phone}"></span>
+					</div>
+					<div class="camp_detail_menu_main col-12" >
+						<span style="font-weight: bold;">주변시설 |</span>
+						<span th:text="${CampFilteredVO.surrFacilTrail} + ','"></span>
+						<span th:text="${CampFilteredVO.surrFacilFishing} + ','"></span>
+						<span th:text="${CampFilteredVO.surrFacilBeach} + ','"></span>
+						<span th:text="${CampFilteredVO.surrFacilMaritimeLeisure} + ','"></span>
+						<span th:text="${CampFilteredVO.surrFacilValley} + ','"></span>
+						<span th:text="${CampFilteredVO.surrFacilStream} + ','"></span>
+						<span th:text="${CampFilteredVO.surrFacilPool} + ','"></span>
+						<span th:text="${CampFilteredVO.surrFacilYouthExperience} + ','"></span>
+						<span th:text="${CampFilteredVO.surrFacilRuralExperience} + ','"></span>
+						<span th:text="${CampFilteredVO.surrFacilChildrensPlay}"></span>
+					</div>
+					
+					<div class="camp_detail_menu_main col-6">
+					   <div class="icon">
+					      <ul class="d-flex pt-3" id="iconSet">
+					         <li th:if="${CampFilteredVO.facilElectricity.equals('전기 사용가능')}"><img
+					            th:src="@{/images/icon/전기.png}">전기</li>
+					         <li th:if="${CampFilteredVO.facilHotWater.equals('온수 사용가능')}"><img
+					            th:src="@{/images/icon/온수.png}">온수</li>
+					         <li th:if="${CampFilteredVO.facilWifi.equals('wifi 사용가능')}"><img
+					            th:src="@{/images/icon/wifi.png}">WIFI</li>
+					         <li th:if="${CampFilteredVO.facilCampfire.equals('장작 판매')}"><img
+					            th:src="@{/images/icon/장작.png}">장작 판매</li>
+					         <li th:if="${CampFilteredVO.facilTrail.equals('산책로 있음')}"><img
+					            th:src="@{/images/icon/산책로.png}">산책로</li>
+					         <li th:if="${CampFilteredVO.facilPool.equals('물놀이장 보유')}"><img
+					            th:src="@{/images/icon/물놀이장.png}">물놀이장</li>
+					         <li th:if="${CampFilteredVO.facilPlayground.equals('놀이터 보유')}"><img
+					            th:src="@{/images/icon/놀이터.png}">놀이터</li>
+					         <li th:if="${CampFilteredVO.facilMart.equals('마트 있음')}"><img
+					            th:src="@{/images/icon/마트.png}">마트</li>
+					      </ul>
+					   </div>
+					</div>
+					<!-- 캠핑장 추가 이미지 -->
+					<div>
+						<div class="detail_page_container_sub" th:if="${CampImageVO != null}" th:utext="${CampImageVO.campImageSub}"></div>
+					</div>
+					<!-- // 캠핑장 추가 이미지 -->
+				</div>
+				
+			<!-- 지도 api -->	
+			<div id="tab2" class="tab__content" style="position:absolute;">
+			<p style="margin-top:-12px">
+			    <em class="link">
+			    </em>
+			</p>
+			<div id="map" style="width:1000px;height:500px;"></div>
+			<!-- <p> 지도 다시 불러오기 버튼이지만 생략함
+			<button onclick="relayout()" style="color: white; background-color: skyblue; border-style: none;">지도 다시 불러오기</button>
+			</p> -->
+			<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=9caf622eb58f834147c672dd550e65e4&libraries=services"></script>
+			<script>
+			let tabMap = document.getElementById('tab_map');
+			
+			tabMap.onclick = function() {
+				
+			var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
+			    mapOption = {
+					/* var lat = position.coords.latitude, // 위도
+				    lon = position.coords.longitude, // 경도 */
+			        center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
+			        level: 3 // 지도의 확대 레벨
+			    };  
+			//지도를 생성합니다  
+			var map = new kakao.maps.Map(mapContainer, mapOption); 
+			
+			/* function relayout() {    
+			    
+			    // 지도를 표시하는 div 크기를 변경한 이후 지도가 정상적으로 표출되지 않을 수도 있습니다
+			    // 크기를 변경한 이후에는 반드시  map.relayout 함수를 호출해야 합니다 
+			    // window의 resize 이벤트에 의한 크기변경은 map.relayout 함수가 자동으로 호출됩니다
+			    map.relayout();
+			} */
+			// 주소-좌표 변환 객체를 생성합니다
+			var geocoder = new kakao.maps.services.Geocoder();
+			
+			let jibunAddress = '[[${CampFilteredVO.jibunAddress}]]';
+			//캠핑장 아이디를 불러와서 jibunAddress를 불러와야
+			// 주소로 좌표를 검색합니다
+			//geocoder.addressSearch(jibunAddress, function(result, status) {
+			
+			geocoder.addressSearch(jibunAddress, function(result, status) {
+			
+			    // 정상적으로 검색이 완료됐으면 
+			     if (status === kakao.maps.services.Status.OK) {
+			
+			        var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+			
+			        // 결과값으로 받은 위치를 마커로 표시합니다
+			        var marker = new kakao.maps.Marker({
+			            map: map,
+			            position: coords
+			        });
+			
+			        // 인포윈도우로 장소에 대한 설명을 표시합니다
+			        var infowindow = new kakao.maps.InfoWindow({
+			            content: '<div style="width:150px;text-align:center;padding:0px;">캠핑장 위치</div>'
+			        });
+			        
+			        infowindow.open(map, marker);
+			        // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
+			        map.setCenter(coords);
+			        
+			    } 
+			})};    
+			</script><!-- //지도 api -->									
+			<div class="detail_page_container_map">조회한 캠핑장의 주소는 <span style="font-weight:bold;" th:text="${CampFilteredVO.jibunAddress}"></span> 입니다.</div>
+			</div>
+			<div id="tab3" class="tab__content">
+				<!-- 댓글 영역 -->
+				<div id="reply_pnl" class="mx-auto my-3 " style="width:950px;">
+					<!-- 개별 게시글 전체 댓글 리스트 -->
+					<div id="reply_list_pnl" class="bg-light my-3">
+					<!-- 댓글 리스트 -->
+					</div>
+					<!-- 댓글 등록/수정 -->
+					<!-- 0424 : 권한없으면 댓글작성 못하게(유재승) -->
+					<div sec:authorize="hasRole('USER')">
+						<div id="reply_write_update_pnl" class="my-3">
+							<textarea id="reply_write_form" name="reply_write_form"
+							class="form-control border"
+							placeholder="리뷰를 100자이내로 작성하십시오."></textarea>
+						</div>
+						<div class="d-flex justify-content-end align-items-center my-2">
+							<!-- 0425등록시 # -> @{'/board/view.do/'+ ${board.boardNum}} 새로고침 되도록 변경... -->
+							<!-- th:href="@{'/Camp/detailpage?Id='+ ${CampFilteredVO.id}}" -->
+							<a th:id="${'reply_write_btn_' + CampFilteredVO.id}" class="btn btn-sm my-2 me-2" style="background-color:#eee;">리뷰 등록</a>
+						</div>
+					</div>
+					<!-- 댓글 수정/삭제 -->
+					<!-- <a href="#" th:id="${'reply_update_btn' + board.boardNum}" class="btn btn-info my-2">댓글 수정</a>
+					<a href="#" th:id="${'reply_delete_btn' + board.boardNum}" class="btn btn-info my-2">댓글 삭제</a> -->
+				</div>
+			</div>
+		</div>
+		<script>
+			// 1. 탭 버튼과 탭 내용 부분들을 querySelectorAll을 사용해 변수에 담는다.
+			const tabItem = document.querySelectorAll(".tab__item");
+			const tabContent = document.querySelectorAll(".tab__content");
+			
+			// 2. 탭 버튼들을 forEach 문을 통해 한번씩 순회한다.
+			// 이때 index도 같이 가져온다.
+			tabItem.forEach((item, index) => {
+			  // 3. 탭 버튼에 클릭 이벤트를 준다.
+			  item.addEventListener("click", (e) => {
+			    // 4. 버튼을 a 태그에 만들었기 때문에, 
+			    // 태그의 기본 동작(링크 연결) 방지를 위해 preventDefault를 추가한다.
+			    e.preventDefault(); // a 
+			    
+			    // 5. 탭 내용 부분들을 forEach 문을 통해 한번씩 순회한다.
+			    tabContent.forEach((content) => {
+			      // 6. 탭 내용 부분들 전부 active 클래스를 제거한다.
+			      content.classList.remove("active");
+			    });
+			
+			    // 7. 탭 버튼들을 forEach 문을 통해 한번씩 순회한다.
+			    tabItem.forEach((content) => {
+			      // 8. 탭 버튼들 전부 active 클래스를 제거한다.
+			      content.classList.remove("active");
+			    });
+			
+			    // 9. 탭 버튼과 탭 내용 영역의 index에 해당하는 부분에 active 클래스를 추가한다.
+			    // ex) 만약 첫번째 탭(index 0)을 클릭했다면, 같은 인덱스에 있는 첫번째 탭 내용 영역에
+			    // active 클래스가 추가된다.
+			    tabItem[index].classList.add("active");
+			    tabContent[index].classList.add("active");
+			  });
+			});
+		</script>
+	</div>
+	</div>
+	</div>
+</body>
+</html>

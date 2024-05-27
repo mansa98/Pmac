@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html 
+xmlns:th="http://www.thymeleaf.org"
+xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+layout:decorate="~{layout}"
+xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+ 	  lang="ko-kr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>login box</title>
+<!-- bootstrap -->
+<link rel="stylesheet" th:href="@{'/webjars/bootstrap/5.3.1/css/bootstrap.min.css'}">
+<style>
+@import url(http://fonts.googleapis.com/earlyaccess/nanumgothic.css);
+</style>
+<link th:href="@{'/css/login.css'}" rel="stylesheet" />
+
+<script type="text/javascript">
+	function popUp(){
+		// open("경로", "이름", "옵션")
+		window.open("/findId", "아이디 찾기", "width=500px, height=400, left=700, top=200");
+	}
+</script>
+<!-- 대희(0525) : 로그인 화면 변경 -->
+<style>
+.content_section_login {
+	width: 100%;
+	min-height: 100vh;
+ 	background-image: url('/images/assets/img/151005.jpg');
+	background-size: cover;
+	background-repeat: no-repeat;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+.content_section_login_box {
+	width: 500px;
+	height: 350px;
+	background-color: white;
+	border-radius: 15px;
+}
+
+.login_title {
+	margin:40px;
+	color: #404040;
+	font-size: 2em;
+	text-align: center;
+}
+
+.login_btns {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+</style>
+</head>
+<body>
+
+	<div layout:fragment="content">
+		<!-- 대희(0525) : 로그인 화면 변경 -->
+		<div class="content_section_login">
+			<div class="content_section_login_box">
+				<div class="login_title">
+					로그인
+				</div>
+				<div class="login_btns">
+					<a th:href="@{'/oauth2/authorization/naver'}" class="btn active m-2" role="button" style="background-image:url('/images/btnG_완성형.png'); background-size:100% 100%; width:300px; height:70px; border-style: none;"></a>
+					<a th:href="@{'/oauth2/authorization/google'}" class="btn active m-2" role="button" style="background-image:url('/images/web_neutral_sq_SI@2x.png'); background-size:100% 100%; width:300px; height:70px; border-style: none;"></a>
+				</div>
+			</div>
+		
+		</div>
+	
+	</div>
+
+
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ko-kr" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+
+<!-- bootstrap webjars -->
+<link rel="stylesheet"
+	th:href="@{/bootstrap/5.3.1/css/bootstrap.min.css}" />
+
+<!-- bootstrap icons webjars -->
+<link rel="stylesheet"
+	th:href="@{/bootstrap-icons/1.11.1/font/bootstrap-icons.css}">
+
+<link th:href="@{'/css/campList.css'}" rel="stylesheet" />
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // 폼 요소 선택
+        var form = document.querySelector('form');
+
+        // 폼 제출 이벤트에 대한 이벤트 리스너 추가
+        form.addEventListener('submit', function(event) {
+            // 라디오 버튼 선택
+            var radioButtons = document.querySelectorAll('input[type=radio][name="themeSearch"]');
+            var isChecked = false;
+
+            // 라디오 버튼 중 하나가 선택되었는지 확인
+            radioButtons.forEach(function(radioButton) {
+                if (radioButton.checked) {
+                    isChecked = true;
+                }
+            });
+
+            // 라디오 버튼 중 하나도 선택되지 않았으면 폼 제출을 막고 알림을 표시
+            if (!isChecked) {
+                event.preventDefault(); // 폼 제출 막기
+                alert("강 또는 산 중 하나를 선택하세요."); // 알림 표시
+            }
+        });
+    });
+</script>
+<script>
+	window.onload = function() {
+		
+		let galleryImages = document.querySelectorAll(".gallery_image");
+		
+		for (var i of galleryImages) {
+			
+			console.log("테스트: " + i);
+			
+		}
+		
+		
+	}
+</script>
+
+</head>
+<body>
+<div layout:fragment="content" class="content_section">
+	
+	<div class="listWrap">
+	
+		<!-- searchBox -->
+		<div class="mx-auto col-lg-4 align-self-baseline my-3 py-3 px-5" id="searchBox">
+		
+			<form id="search_form" th:action="@{/camp/searchList.do}" method="get">
+				<div>
+					<div class="form-check form-check-inline">
+						<input class="form-check-input" type="radio" id="themeSearch"
+							name="themeSearch" value="강"> <label
+							class="form-check-label" for="themeSearch" style="color: white">강</label>
+					</div>
+					<div class="form-check form-check-inline">
+						<input class="form-check-input" type="radio" id="themeSearch"
+							name="themeSearch" value="산"> <label
+							class="form-check-label" for="themeSearch" style="color: white">산</label>
+					</div>
+				</div>
+				
+				<p class="text-white mb-3"></p>
+				
+				<!-- d-flex -->
+				<div class="d-flex">
+					<!-- select_box_wrapper -->
+					<div class="select_box_wrapper me-2">
+						<select name="addressSearch" id="addressSearch"
+							style="color: #6C757D; height: 50px; border-radius: 6px;">
+							<option value="전체">전체/도</option>
+							<option value="서울시">서울시</option>
+							<option value="부산시">부산시</option>
+							<option value="대구광역시">대구시</option>
+							<option value="인천광역시">인천시</option>
+							<option value="광주광역시">광주시</option>
+							<option value="대전광역시">대전시</option>
+							<option value="울산광역시">울산시</option>
+							<option value="세종특별자치시">세종시</option>
+							<option value="경기도">경기도</option>
+							<option value="강원도">강원도</option>
+							<option value="충청북도">충청북도</option>
+							<option value="충청남도">충청남도</option>
+							<option value="전라북도">전라북도</option>
+							<option value="전라남도">전라남도</option>
+							<option value="경상북도">경상북도</option>
+							<option value="경상남도">경상남도</option>
+							<option value="제주특별자치도">제주도</option>
+						</select>
+					</div>
+					<!-- //select_box_wrapper -->
+					<div class="searchButton">
+						<div class="me-3" style="width: 400px">
+							<input class="form-control mr-sm-2" style="height: 50px"
+								type="search" id="searchWord" name="searchWord"
+								placeholder="캠핑장 이름을 검색하세요" aria-label="Search">
+						</div>
+						<div style="width:120px">
+							<button
+								style="background-color: #ff923e; height: 50px; border-radius: 5px; color: white"
+								type="submit">검 색</button>
+						</div>
+					</div>
+				</div>
+				<!--//d-flex-->
+			</form>
+		</div> 
+		<!--// searchBox -->
+		<!-- //col-8 -->
+		
+		<div class="mx-auto d-flex justify-content-center">
+		
+			
+			
+			<ul>
+				
+				<li class="my-3" style="width:1000px;">
+					총<strong>"[[${listCount}]]"</strong>개의 캠핑장이 검색되었습니다.
+				</li>
+				
+				<li th:if="${listCount == 0}">검색 결과를 찾지 못했습니다.</li>
+				
+				<li style="width:1000px;" class="bg-light mb-3 d-flex justify-content-start" th:each="camp : ${campList}">
+					
+					<!-- 메인 이미지 -->
+					<div class="align-items-start flex-column" style="width:300px; height:100%;">
+						<div th:each="image : ${campImageList}">
+							<div th:if="${image.campName == camp.campName}">
+								<a th:href="@{'/Camp/detailpage?Id=' + ${camp.id}}">
+								<img class="gallery_image" th:src="${image.campImageMain}" height="190px" width="282px" alt="캠프 메인 이미지">
+								</a>
+							</div>
+						</div> 
+					</div> <!-- //메인 이미지 -->
+					
+					<div style="width:700px; height:230px;">
+					
+						<div class="campName"style="height:35%;"><a th:href="@{'/Camp/detailpage?Id=' + ${camp.id}}"><span th:text="${camp.campName}"></span></a></div>
+						
+						<div class="campAddress" style="height:20%;"><span th:text="${camp.jibunAddress}"></span></div>
+						
+						<div class="campReview" style="height:12%;" th:if="${campReviewStats[camp.campName][0]} >= ${campReviewStats[camp.campName][1]}">리뷰 평가<a class="positive"> 긍정적</a></div>
+						<div class="campReview" style="height:12%;" th:if="${campReviewStats[camp.campName][0]} < ${campReviewStats[camp.campName][1]}">리뷰 평가<a class="negative"> 부정적</a></div>
+					
+						<div class="icon"  style="height:33%;">
+							<ul class="d-flex justify-content-evenly pt-3 pb-1" id="iconSet">
+								<li th:if="${camp.facilElectricity.equals('전기 사용가능')}"><img
+									th:src="@{/images/icon/전기.png}">전기</li>
+								<li th:if="${camp.facilHotWater.equals('온수 사용가능')}"><img
+									th:src="@{/images/icon/온수.png}">온수</li>
+								<li th:if="${camp.facilWifi.equals('wifi 사용가능')}"><img
+									th:src="@{/images/icon/wifi.png}">WIFI</li>
+								<li th:if="${camp.facilCampfire.equals('장작 판매')}"><img
+									th:src="@{/images/icon/장작.png}">장작 판매</li>
+								<li th:if="${camp.facilTrail.equals('산책로 있음')}"><img
+									th:src="@{/images/icon/산책로.png}">산책로</li>
+								<li th:if="${camp.facilPool.equals('물놀이장 보유')}"><img
+									th:src="@{/images/icon/물놀이장.png}">물놀이장</li>
+								<li th:if="${camp.facilPlayground.equals('놀이터 보유')}"><img
+									th:src="@{/images/icon/놀이터.png}">놀이터</li>
+								<li th:if="${camp.facilMart.equals('마트 있음')}"><img
+									th:src="@{/images/icon/마트.png}">마트</li>
+							</ul>
+						</div>
+					</div><!-- 내용 -->
+				</li>
+				
+			</ul>
+		</div>
+		
+		<!-- 페이징 -->
+		<div class="d-flex justify-content-center mt-4 mb-5">
+
+			<nav aria-label="Page navigation example">
+				<ul class="pagination justify-content-center">
+					<!-- <li class="page-item"><a class="page-link" href="${pageVO.currPage}">1</a></li> -->
+					<!-- 첫페이지 -->
+					<li class="page-item"><a class="page-link"
+						th:href="@{'/camp/searchList.do?currPage=1&themeSearch='+${themeSearch}+'&addressSearch='+${addressSearch}+'&searchWord='+${searchWord}}">
+							<!-- "@{'/board/searchList.do?currPage=1&searchKey='+${searchKey}+'&searchWord='+${searchWord}}" -->
+							<!-- <i class="bi bi-arrow-bar-left"></i> --> <i
+							class="bi bi-chevron-double-left"></i>
+					</a></li>
+
+					<!-- 이전 페이지 -->
+					<li th:unless="${pageVO.currPage == 1}" class="page-item"><a
+						class="page-link"
+						th:href="@{'/camp/searchList.do?currPage='+${pageVO.prePage}+'&themeSearch='+${themeSearch}+'&addressSearch='+${addressSearch}+'&searchWord='+${searchWord}}"
+						aria-label="Previous" aria-hidden="true"><i
+							class="bi bi-chevron-left"></i> <!-- &raquo; --></a></li>
+					<!-- 이전 페이지(현재페이지가 1일때: 이전 버튼을 비활성화) -->
+					<li th:if="${pageVO.currPage == 1}" class="page-item"><a
+						class="page-link" aria-label="Previous" aria-hidden="true"><i
+							class="bi bi-chevron-left"></i> <!-- &raquo; --></a></li>
+
+					<!-- // 현재 페이지에 보여줄 마지막 페이지 수(10, 20, 30, ...)
+							int endPage = startPage + 10; -->
+
+					<!-- 본페이지 3페이지씩 출력 -->
+					<!-- 페이지가 1개 초과 10이하 일때 분량이 될때 -->
+					<li th:if="${1 < pageVO.maxPage}"
+						th:each="num : ${#numbers.sequence(pageVO.startPage,pageVO.endPage)}"
+						th:class="${pageVO.currPage == num ? 'page-item active':'page-item'}">
+						<a class="page-link"
+						th:href="@{'/camp/searchList.do?currPage='+${num}+'&themeSearch='+${themeSearch}+'&addressSearch='+${addressSearch}+'&searchWord='+${searchWord}}">[[${num}]]</a>
+					</li>
+
+					<!-- 이건 없어도 될듯 첫화면이 3페이지 분량이 안될때 -->
+					<!-- <li th:if="${pageVO.maxPage <= 2}"
+			    				th:each="num : ${#numbers.sequence(pageVO.prePage,pageVO.maxPage)}"  
+			    				th:class="${pageVO.currPage == num ? 'page-item active':'page-item'}">
+			    				<a class="page-link" th:href="@{'/board/list.do?currPage='+${num}}">[[${listCount}]]</a>
+			    			</li> -->
+
+					<!-- 한페이지 분량일때 -->
+					<!-- 생략가능 -->
+					<li th:if="${pageVO.maxPage == 1}"
+						th:each="num : ${#numbers.sequence(pageVO.startPage,pageVO.endPage)}"
+						th:class="${pageVO.currPage == num ? 'page-item active':'page-item'}">
+						<a class="page-link"
+						th:href="@{'/camp/searchList.do?currPage='+${num}+'&themeSearch='+${themeSearch}+'&addressSearch='+${addressSearch}+'&searchWord='+${searchWord}}">[[${num}]]</a>
+					</li>
+
+					<!-- 게시글이 없을때 -->
+					<li th:if="${pageVO.maxPage == 0}"
+						th:each="num : ${#numbers.sequence(pageVO.maxPage,pageVO.maxPage)}"
+						th:class="${pageVO.currPage == num ? 'page-item':'page-item'}">
+						<a class="page-link" href="#">[[${num}]]</a>
+					</li>
+
+
+					<!-- 다음 페이지 -->
+					<li class="page-item" th:if="${pageVO.currPage != pageVO.maxPage}">
+						<a class="page-link"
+						th:href="@{'/camp/searchList.do?currPage='+${pageVO.nextPage}+'&themeSearch='+${themeSearch}+'&addressSearch='+${addressSearch}+'&searchWord='+${searchWord}}"
+						aria-label="Next" aria-hidden="true"><i
+							class="bi bi-chevron-right"></i> <!-- &raquo; --></a>
+					</li>
+					<!-- 다음 페이지(현재 페이지가 maxPage랑 동일할때: 링크 비활성화) -->
+					<li class="page-item" th:if="${pageVO.currPage == pageVO.maxPage}">
+						<a class="page-link" aria-label="Next" aria-hidden="true"><i
+							class="bi bi-chevron-right"></i> <!-- &raquo; --></a>
+					</li>
+
+
+					<!-- 다음페이지가 없을 경우 ex)게시글 없을 경우 -->
+					<li class="page-item" th:if="${pageVO.maxPage == 0}"><a
+						class="page-link" href="#" aria-label="Next" aria-hidden="true">다음<!-- &raquo; --></a>
+					</li>
+
+					<!-- 마지막 페이지 -->
+					<li class="page-item" th:if="${pageVO.maxPage != 0}"><a
+						class="page-link"
+						th:href="@{'/camp/searchList.do?currPage='+${pageVO.maxPage}+'&themeSearch='+${themeSearch}+'&addressSearch='+${addressSearch}+'&searchWord='+${searchWord}}">
+							<!-- <i class="bi bi-arrow-bar-right"></i> --> <i
+							class="bi bi-chevron-double-right"></i>
+					</a></li>
+					<!-- 마지막 페이지가 없을 경우 ex) 게시글 없을 경우 -->
+					<li class="page-item" th:if="${pageVO.maxPage == 0}"><a
+						class="page-link" href="#"> <i class="bi bi-arrow-bar-right"></i>
+					</a></li>
+				</ul>
+			</nav>
+
+		</div>
+		<!-- // 검색인 경우(페이징) -->
+		
+	</div>
+	<!-- wrap 끝 -->
+	</div>
+	<!-- 레이아웃 끝 -->
+</body>
+</html>
